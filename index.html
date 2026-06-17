@@ -77,8 +77,127 @@ li::marker{color:var(--yellow)}
 .footer b{color:var(--yellow)}
 .fade{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
 .fade.show{opacity:1;transform:none}
+
 @media(max-width:1050px){.grid,.grid2,.logo-versions{grid-template-columns:1fr}.logo-version h3,.logo-version p{text-align:center}}
 @media(max-width:720px){.header{display:block;text-align:center}.brand-group{justify-content:center;gap:18px}.brand img{width:190px}.ced-header-logo img{width:86px;max-height:48px}.nav{justify-content:center;margin-top:12px;gap:14px}.hero{padding-top:185px}section{padding:62px 5%}h1{letter-spacing:-1px}.subtitle,.lead,.versions-intro{font-size:18px}.logo-stage{width:min(560px,92vw)}}
+
+
+
+
+
+
+/* === CED logo: animación continua, lenta y sin pausa === */
+.logo-stage{
+  position:relative;
+  overflow:visible;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  isolation:isolate;
+}
+
+.logo-stage img{
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:auto;
+  display:block;
+  border:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transform-origin:center;
+  will-change:clip-path,opacity,transform;
+}
+
+/* Estado oculto antes de aparecer */
+.logo-stage:not(.ced-animate):not(.ced-loop) img{
+  opacity:0;
+  clip-path:circle(0% at 12% 50%);
+}
+
+/* Una sola animación: aparece lentamente y sigue flotando sin corte */
+.logo-stage.ced-animate img{
+  animation:cedOneFlow 24s linear infinite;
+}
+
+/* Cuando ya apareció, sigue flotando en la misma línea visual */
+.logo-stage.ced-loop img{
+  opacity:1;
+  clip-path:circle(140% at 50% 50%);
+  animation:cedFloatOnly 7.8s ease-in-out infinite;
+}
+
+/* Sin puntos extra, sin sombras, sin brillos, sin bordes */
+.logo-stage::before,
+.logo-stage::after{
+  display:none!important;
+  content:none!important;
+}
+
+@keyframes cedOneFlow{
+  0%{
+    opacity:0;
+    transform:translateY(12px) scale(.985);
+    clip-path:circle(0% at 12% 50%);
+  }
+  10%{
+    opacity:.14;
+    transform:translateY(10px) scale(.987);
+    clip-path:circle(10% at 16% 50%);
+  }
+  24%{
+    opacity:.34;
+    transform:translateY(8px) scale(.990);
+    clip-path:circle(26% at 25% 50%);
+  }
+  40%{
+    opacity:.58;
+    transform:translateY(6px) scale(.993);
+    clip-path:circle(46% at 36% 50%);
+  }
+  56%{
+    opacity:.78;
+    transform:translateY(4px) scale(.996);
+    clip-path:circle(68% at 46% 50%);
+  }
+  70%{
+    opacity:.94;
+    transform:translateY(1px) scale(.999);
+    clip-path:circle(102% at 50% 50%);
+  }
+  74%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    clip-path:circle(140% at 50% 50%);
+  }
+  82%{
+    opacity:1;
+    transform:translateY(-5px) scale(1.003);
+    clip-path:circle(140% at 50% 50%);
+  }
+  91%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    clip-path:circle(140% at 50% 50%);
+  }
+  100%{
+    opacity:1;
+    transform:translateY(-5px) scale(1.003);
+    clip-path:circle(140% at 50% 50%);
+  }
+}
+
+@keyframes cedFloatOnly{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-7px) scale(1.004)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .logo-stage img{animation:none!important;opacity:1!important;transform:none!important;clip-path:none!important}
+  .logo-stage::before,.logo-stage::after{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -161,5 +280,38 @@ const canvas=document.getElementById('particles-bg'),ctx=canvas.getContext('2d')
 const progress=document.getElementById('progress');addEventListener('scroll',()=>{const s=scrollY/(document.body.scrollHeight-innerHeight);progress.style.width=(s*100)+'%';});
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')}),{threshold:.12});document.querySelectorAll('.fade').forEach(el=>io.observe(el));
 </script>
+
+
+
+
+
+
+
+<script>
+(function(){
+  const stages = document.querySelectorAll('.logo-stage');
+  if(!stages.length) return;
+
+  function play(stage){
+    stage.classList.remove('ced-animate','ced-loop');
+    void stage.offsetWidth;
+    stage.classList.add('ced-animate');
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const stage = entry.target;
+      if(entry.isIntersecting && entry.intersectionRatio > 0.38){
+        play(stage);
+      }else{
+        stage.classList.remove('ced-animate','ced-loop');
+      }
+    });
+  }, {threshold:[0,.38,.7]});
+
+  stages.forEach(stage => observer.observe(stage));
+})();
+</script>
+
 </body>
 </html>
